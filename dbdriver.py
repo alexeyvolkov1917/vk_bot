@@ -6,7 +6,6 @@ class Db_driver:
         pass
 
     def get_connect(self):
-
         return psycopg2.connect(
             host='109.194.141.162',
             port='5432',
@@ -50,6 +49,7 @@ class Db_driver:
         conn.commit()
         cursor.close()
         conn.close()
+        self.update_jkh_and_address(id_jkh,address)
 
     def get_jobs(self):
         conn = self.get_connect()
@@ -71,7 +71,31 @@ class Db_driver:
     def update_jkh_and_address(self,jkh_id,addres):
         conn = self.get_connect()
         cursor = conn.cursor()
-        cursor.execute(f"insert into jkh_and_adress(jkh_id,adress) values ({jkh_id},'{addres})")
+        cursor.execute(f"insert into jkh_and_adress(jkh_id,adress) values ({jkh_id},'{addres}')")
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def write_order(self,jkh, job, address,date):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f"insert into orders(jkh,job,address,date) values ({jkh},{job},'{address}','{date}')")
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def write_order(self,jkh, job, address,date):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f"insert into orders(jkh,job,address,date) values ({jkh},{job},'{address}','{date}')")
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def write_response(self,user, order, rating):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f"insert into response(user_id,order_id,rating) values ({user},{order},{rating})")
         conn.commit()
         cursor.close()
         conn.close()
