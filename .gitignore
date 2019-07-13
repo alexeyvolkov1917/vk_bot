@@ -1,0 +1,9 @@
+/.idea
+/__pycache__
+my_token.py
+*.txt
+*.md
+*.png
+*.patch
+*.json
+/venv
