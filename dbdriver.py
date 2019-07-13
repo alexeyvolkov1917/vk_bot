@@ -9,13 +9,22 @@ class Db_driver:
     def get_connect(self):
 
         return psycopg2.connect(
-            host='localhost',
+            host='109.194.141.162',
             port='5432',
             database='vk_bot',
             user='postgres',
-            password='admin')
+            password='123456')
 
 
+    def get_jkh(self):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute('select id, name from jkh')
+        list = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return list
 
     def write_user_to_db(self,user):
         conn = self.get_connect()
@@ -39,7 +48,6 @@ class Db_driver:
         conn.commit()
         cursor.close()
         conn.close()
-
 
     def clear_database(self):
         conn = self.get_connect()

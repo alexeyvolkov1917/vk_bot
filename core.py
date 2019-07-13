@@ -4,7 +4,7 @@ from loader import Loader
 
 
 db_driver = Db_driver()
-db_driver.write_jkh_to_db()
+print(db_driver.get_jkh())
 
 
 
