@@ -1,4 +1,5 @@
 import psycopg2
+import matplotlib.pyplot as plt
 
 class Db_driver:
 
@@ -13,6 +14,33 @@ class Db_driver:
             user='postgres',
             password='123456')
 
+    def update_jkh(self):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute('select jkh_id, avg(rating) from first_rating group by jkh_id')
+        first_rating = cursor.fetchall()
+        cursor.execute('select jkh, avg(rating) from response join orders on orders.order_id = response.order_id')
+        job_rating = cursor.fetchall()
+        jkh = {}
+        for item in first_rating:
+            jkh[item[0]] = item[1] * 0,5
+        for item in job_rating:
+            jkh[item[0]] += item[0]
+        for key in jkh.keys():
+            cursor.execute(f'update jkh set rating = {jkh[key]} where jkh = {key}')
+        cursor.commit()
+        cursor.close()
+        conn.close()
+        return list
+
+    def get_rating(self):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute('select name,rating from jkh')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
 
     def get_jkh(self):
         conn = self.get_connect()
@@ -27,6 +55,19 @@ class Db_driver:
         conn = self.get_connect()
         cursor = conn.cursor()
         cursor.execute(f'select id from users where id = {id}')
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        if len(rows) == 0:
+            return False
+        else:
+            return True
+
+    def check_key(self,key):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select id from jkh where key = {key}')
         rows = cursor.fetchall()
         cursor.close()
         conn.close()
