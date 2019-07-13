@@ -6,6 +6,7 @@ class Db_driver:
         pass
 
 
+
     def get_connect(self):
 
         return psycopg2.connect(
@@ -26,16 +27,29 @@ class Db_driver:
         conn.close()
         return list
 
+    def check_user(self, id):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select id from users where id = {id}')
+        rows = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        if len(rows) == 0:
+            return False
+        else:
+            return True
+
     def write_user_to_db(self,user):
         conn = self.get_connect()
         cursor = conn.cursor()
-        values = 'values'
         id = user['id']
         first_name = user['first_name']
         last_name = user['last_name']
         address = user['address']
         id_jkh = user['id_jkh']
-        values += f" ('{id}', '{first_name}', '{last_name}','{id_jkh}','{address}'),"
+        values = f"values ('{id}', '{first_name}', '{last_name}','{id_jkh}','{address}')"
         cursor.execute('insert into users(id, first_name, last_name,id_jkh, adress) ' + values)
         conn.commit()
         cursor.close()
@@ -49,13 +63,6 @@ class Db_driver:
         cursor.close()
         conn.close()
 
-    def clear_database(self):
-        conn = self.get_connect()
-        cur = conn.cursor()
-        cur.execute('delete from friends')
-        cur.execute('delete from users')
-        cur.commit()
-        cur.close()
-        conn.close()
+
 
 
