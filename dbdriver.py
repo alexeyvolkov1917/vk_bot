@@ -5,8 +5,6 @@ class Db_driver:
     def __init__(self):
         pass
 
-
-
     def get_connect(self):
 
         return psycopg2.connect(
@@ -22,7 +20,6 @@ class Db_driver:
         cursor = conn.cursor()
         cursor.execute('select id, name from jkh')
         list = cursor.fetchall()
-        conn.commit()
         cursor.close()
         conn.close()
         return list
@@ -32,7 +29,6 @@ class Db_driver:
         cursor = conn.cursor()
         cursor.execute(f'select id from users where id = {id}')
         rows = cursor.fetchall()
-        conn.commit()
         cursor.close()
         conn.close()
 
@@ -41,7 +37,7 @@ class Db_driver:
         else:
             return True
 
-    def write_user_to_db(self,user):
+    def write_user(self,user):
         conn = self.get_connect()
         cursor = conn.cursor()
         id = user['id']
@@ -55,7 +51,32 @@ class Db_driver:
         cursor.close()
         conn.close()
 
-    def write_person_id_in_db(self,id, person_id):
+    def get_jobs(self):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute('select id, name from jobs')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
+
+    def write_first_rating(self,user_id,jkh_id,rating):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'insert into first_rating(jkh_id,user_id,rating) values ({jkh_id},{user_id},{rating})')
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def update_jkh_and_address(self,jkh_id,addres):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f"insert into jkh_and_adress(jkh_id,adress) values ({jkh_id},'{addres})")
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def write_person_id(self, id, person_id):
         conn = self.get_connect()
         cursor = conn.cursor()
         cursor.execute(f'update jkh set person_id = {person_id} where id = {id}')
