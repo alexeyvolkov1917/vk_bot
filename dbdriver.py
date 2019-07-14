@@ -1,4 +1,5 @@
 import psycopg2
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 class Db_driver:
@@ -23,9 +24,9 @@ class Db_driver:
         job_rating = cursor.fetchall()
         jkh = {}
         for item in first_rating:
-            jkh[item[0]] = item[1] * 0,5
+            jkh[item[0]] = item[1]
         for item in job_rating:
-            jkh[item[0]] += item[0]
+            jkh[item[0]] = (item[0] + item[1])/ 2
         for key in jkh.keys():
             cursor.execute(f'update jkh set rating = {jkh[key]} where jkh = {key}')
         cursor.commit()
@@ -33,19 +34,11 @@ class Db_driver:
         conn.close()
         return list
 
-    def get_rating(self):
-        conn = self.get_connect()
-        cursor = conn.cursor()
-        cursor.execute('select name,rating from jkh')
-        list = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return list
 
     def get_jkh(self):
         conn = self.get_connect()
         cursor = conn.cursor()
-        cursor.execute('select id, name from jkh')
+        cursor.execute('select id, name from jkh order by rating desc')
         list = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -125,17 +118,10 @@ class Db_driver:
         cursor.close()
         conn.close()
 
-    def write_order(self,jkh, job, address,date):
-        conn = self.get_connect()
-        cursor = conn.cursor()
-        cursor.execute(f"insert into orders(jkh,job,address,date) values ({jkh},{job},'{address}','{date}')")
-        conn.commit()
-        cursor.close()
-        conn.close()
-
     def write_response(self,user, order, rating):
         conn = self.get_connect()
         cursor = conn.cursor()
+        # cursor.execute(f"select weight from jobs j join order o on j.order_id = o.id")
         cursor.execute(f"insert into response(user_id,order_id,rating) values ({user},{order},{rating})")
         conn.commit()
         cursor.close()
