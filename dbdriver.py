@@ -43,6 +43,14 @@ class Db_driver:
         conn.close()
         return list
 
+    def get_jobs(self,jkh):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select id, name from orders o join jobs j on o.job = j.id where jkh=0')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
 
     def get_jkh(self):
         conn = self.get_connect()
