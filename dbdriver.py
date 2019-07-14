@@ -60,6 +60,25 @@ class Db_driver:
         conn.close()
         return list
 
+    def get_last_work_for_user(self,id):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select job, date, order_id from orders o join users u on o.address= u.adress where u.id ={id} limit 5')
+        jobs = cursor.fetchall()
+        list = []
+        for job in jobs:
+            cursor.execute(f'select name from jobs where id = {job[0]}')
+            name = cursor.fetchall()
+            list.add({'name': name, 'date': job[1], 'order_id':job[2] })
+        for item in list:
+            id = item['order_id']
+            cursor.execute(f'select avg(rating) from response group where order_id ={id}')
+            avg=cursor.fetchall()
+            item.update({'rating:',avg[0][0]})
+        cursor.close()
+        conn.close()
+        return list
+
     def get_addr_from_jkh(self, jkh_id):
         conn = self.get_connect()
         cursor = conn.cursor()

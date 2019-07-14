@@ -178,9 +178,10 @@ for event in Longpoll.listen():
                 random_id=randomid
             )
         if event.text == 'Посмотреть последние выполненные работы' and Check_user is True:
+            list = dbdrive.get_last_work_for_user(event.user_id)
             vk.messages.send(
                 user_id=event.user_id,
-                message='Список последних 5 выполненных работ',
+                message=list,
                 random_id=randomid
             )
         if event.text == 'Рейтинг ЖКХ' and Check_user is True:
