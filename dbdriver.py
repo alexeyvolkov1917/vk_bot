@@ -32,7 +32,6 @@ class Db_driver:
         cursor.commit()
         cursor.close()
         conn.close()
-        return list
 
     def get_rating(self):
         conn = self.get_connect()
@@ -60,6 +59,33 @@ class Db_driver:
         cursor.close()
         conn.close()
         return list
+
+    def get_addr_from_jkh(self, jkh_id):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute('select adress from jkh_and_adress where jkh_id=' + jkh_id)
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
+
+    def get_jkh_from_addr(self, addr):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute('select * from jkh_and_adress where adress='+addr)
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
+
+    def get_user(self, id):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select * from users where id = {id}')
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return rows
 
     def check_user(self, id):
         conn = self.get_connect()
@@ -151,6 +177,7 @@ class Db_driver:
         conn.commit()
         cursor.close()
         conn.close()
+
 
 
 

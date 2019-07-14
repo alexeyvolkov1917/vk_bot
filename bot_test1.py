@@ -5,9 +5,10 @@ import random
 from vk_api import keyboard
 from vk_api.keyboard import *
 from dbdriver import Db_driver
+from datetime import date
 
 session = requests.Session()
-vk_session = vk_api.VkApi(login='spaikywaiky@gmail.com', token='5aec034dde24a5d2c2c00214209e4dfaec92d0bc470c86055ecb1e86aed3928e1142821a6b39699dcf81d')
+vk_session = vk_api.VkApi(token='5aec034dde24a5d2c2c00214209e4dfaec92d0bc470c86055ecb1e86aed3928e1142821a6b39699dcf81d')
 
 dbdrive = Db_driver()
 
@@ -20,6 +21,8 @@ Check_JKH = False
 Longpoll = VkLongPoll(vk_session)
 vk = vk_session.get_api()
 
+
+
 class Keyboards(object):
     def __init__(self):
         pass
@@ -28,7 +31,7 @@ class Keyboards(object):
         kb = keyboard.VkKeyboard(one_time=False)
         kb.get_empty_keyboard()
         kb.add_button('Добавить работу')
-        kb.add_button('Посмотреть место в рейтинге')
+        kb.add_button('Посмотреть рейтинг')
         kb.add_button('Выполненные работы')
         return kb.get_keyboard()
 
@@ -46,14 +49,33 @@ class Keyboards(object):
         return kb.get_keyboard()
 
     def JKH_jobs(self, jobs):
-        kb = keyboard.VkKeyboard(one_time=True)
         i = 0
+        kb = keyboard.VkKeyboard(one_time=True)
         for job in jobs:
             if i > 4:
                 kb.add_line()
-                i = 0
             kb.add_button(job[1], VkKeyboardColor.PRIMARY)
             i += 1
+        return kb.get_keyboard()
+
+    def JKH_rating(self):
+        i = 1
+        kb = keyboard.VkKeyboard(one_time=True)
+        while i <= 5:
+            if i > 4:
+                kb.add_line()
+            kb.add_button(i, color=VkKeyboardColor.PRIMARY)
+            i += 1
+        return kb.get_keyboard()
+
+    def JKH_addr(self, id_jkh):
+        addrs = dbdrive.get_addr_from_jkh(id_jkh)
+        i = 0
+        kb = keyboard.VkKeyboard(one_time=True)
+        for addr in addrs:
+            if i > 4:
+                kb.add_line()
+            kb.add_button(addr[0], color=VkKeyboardColor.PRIMARY)
         return kb.get_keyboard()
 
 
@@ -61,18 +83,19 @@ kb1 = keyboard.VkKeyboard(one_time=True)
 kb1.add_button('ЖКХ', color=VkKeyboardColor.PRIMARY)
 kb1.add_button('Житель', color=VkKeyboardColor.PRIMARY)
 
-kbtest = keyboard.VkKeyboard(one_time=True)
-kbtest.add_button('Test')
-kbtest.add_button('TestTest')
 
 kb_prim = Keyboards()
 kb_sec = Keyboards()
 kb2 = kb_prim.firstKB()
+job_done = ''
 for event in Longpoll.listen():
     randomid = random.randint(1, 9999999)
     Check_user = False
     Check_JKH = False
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
+        # for job in jobs:
+        #     if event.text == job:
+
         for user in user_list:
             if user == event.user_id:
                 Check_user = True
@@ -130,10 +153,16 @@ for event in Longpoll.listen():
                 keyboard=kb_sec.JKH_jobs(jobs),              #ДОПИЛИТЬ
                 random_id=randomid
             )
-        if event.text == 'Посмотреть место в рейтинге' and Check_JKH is True:
+
+        if event.text == 'Посмотреть рейтинг' and Check_JKH is True:
+            raits = dbdrive.get_rating()
+            messagereit = ""
+            for rait in raits:
+                messagereit += str(raits.index(rait)+1) +':'+ str(rait[0]) + ' с оценкой - ' + str(rait[1]) + '\n'
             vk.messages.send(
                 user_id=event.user_id,
-                message='Вы занимаете ... место',        #ДОПИЛИТЬ
+                message='Рейтинг:\n'
+                        + messagereit,        #ДОПИЛИТЬ
                 random_id=randomid
             )
         if event.text == 'Выполненные работы' and Check_JKH is True:
@@ -160,8 +189,62 @@ for event in Longpoll.listen():
                 message='Рейтинг ЖКХ...',
                 random_id=randomid
             )
+        if event.text == ('1' or '2' or '3' or '4' or '5') and Check_user is True:
+            addr = dbdrive.get_user(event.user_id)[0][3]
+            jkh_id = dbdrive.get_jkh_from_addr(addr)
+            dbdrive.write_first_rating(event.user_id, jkh_id, event.text)
+
+        for job in jobs:
+            if event.text == job[1] and Check_JKH is True:
+                vk.messages.send(
+                    user_id=event.user_id,
+                    message='Напишите адрес выполненной работы',
+                    random_id=randomid,
+                    keyboard=kb_prim.JKH_addr()
+                )
+                job_done = job[1]
+
+        if Check_JKH is True:
+            addr1 = dbdrive.get_addr_from_jkh(event.user_id)
+            for addr in addr1:
+                if event.text == addr[0]:
+                    if job_done != '':
+                        vk.messages.send(
+                            user_id=event.user_id,
+                            message='Выполенная работа была добавлена',
+                            random_id=randomid
+                        )
+                        dbdrive.write_order(address=addr, jkh=event.user_id, job=job_done, date=date.today())
+                        job_done = ''
+                    else:
+                        vk.messages.send(
+                            user_id=event.user_id,
+                            message='Нечего добавлять',
+                            random_id=randomid
+                        )
 
 
 
 
+        elif Check_JKH is True:
+            vk.messages.send(
+                user_id=event.user_id,
+                message='Я вас не понимаю',
+                keyboard=kb_prim.JKH_KB_main(),
+                random_id=randomid
+            )
+        elif Check_user is True:
+            vk.messages.send(
+                user_id=event.user_id,
+                message='Я вас не понимаю',
+                keyboard=kb_prim.Users_main(),
+                random_id=randomid
+            )
 
+        else:
+            vk.messages.send(
+                user_id=event.user_id,
+                message='Я вас не понимаю. Вы хотите зарегестрироваться как житель или предстовитель ЖКХ?',
+                keyboard=kb_prim.firstKB(),
+                random_id=randomid
+            )
