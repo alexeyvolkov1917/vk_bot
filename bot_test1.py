@@ -68,14 +68,18 @@ class Keyboards(object):
             i += 1
         return kb.get_keyboard()
 
-    def JKH_addr(self, id_jkh):
-        addrs = dbdrive.get_addr_from_jkh(id_jkh)
+    def JKH_addr(self, id_per):
+        id_jkh = dbdrive.get_jkh_by_id(id_per)
+        addrs = dbdrive.get_addr_from_jkh(id_jkh[0])
         i = 0
         kb = keyboard.VkKeyboard(one_time=True)
         for addr in addrs:
-            if i > 4:
+            if i > 3:
                 kb.add_line()
+                i = 0
             kb.add_button(addr[0], color=VkKeyboardColor.PRIMARY)
+        print(kb.get_keyboard())
+
         return kb.get_keyboard()
 
 
@@ -195,18 +199,11 @@ for event in Longpoll.listen():
             jkh_id = dbdrive.get_jkh_from_addr(addr)
             dbdrive.write_first_rating(event.user_id, jkh_id, event.text)
 
-        for job in jobs:
-            if event.text == job[1] and Check_JKH is True:
-                vk.messages.send(
-                    user_id=event.user_id,
-                    message='Напишите адрес выполненной работы',
-                    random_id=randomid,
-                    keyboard=kb_prim.JKH_addr()
-                )
-                job_done = job[1]
+
 
         if Check_JKH is True:
-            addr1 = dbdrive.get_addr_from_jkh(event.user_id)
+            id = dbdrive.get_jkh_by_id(event.user_id)
+            addr1 = dbdrive.get_addr_from_jkh(id[0])
             for addr in addr1:
                 if event.text == addr[0]:
                     if job_done != '':
@@ -223,6 +220,15 @@ for event in Longpoll.listen():
                             message='Нечего добавлять',
                             random_id=randomid
                         )
+            for job in jobs:
+                if event.text == job[1] and Check_JKH is True:
+                    vk.messages.send(
+                        user_id=event.user_id,
+                        message='Напишите адрес выполненной работы',
+                        random_id=randomid,
+                        keyboard=kb_prim.JKH_addr(event.user_id)
+                    )
+                    job_done = job[1]
 
 
 
