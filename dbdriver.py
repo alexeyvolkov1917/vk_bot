@@ -132,14 +132,9 @@ class Db_driver:
         else:
             return True
 
-    def write_user(self,user):
+    def write_user(self,id,first_name,last_name,address,id_jkh):
         conn = self.get_connect()
         cursor = conn.cursor()
-        id = user['id']
-        first_name = user['first_name']
-        last_name = user['last_name']
-        address = user['address']
-        id_jkh = user['id_jkh']
         values = f"values ('{id}', '{first_name}', '{last_name}','{id_jkh}','{address}')"
         cursor.execute('insert into users(id, first_name, last_name,id_jkh, adress) ' + values)
         conn.commit()
