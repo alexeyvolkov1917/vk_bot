@@ -83,14 +83,14 @@ for event in Longpoll.listen():
             if event.from_user and Check_JKH == False and Check_user == False:
                 vk.messages.send(
                     user_id=event.user_id,
-                    message='Hello, Житель или ЖКХ?',
+                    message='Здравствуйте. Вы хотите зарегестрироваться как житель или предстовитель ЖКХ?',
                     random_id=randomid,
                     keyboard=kb1.get_keyboard()
                 )
             elif event.from_user and (Check_user == True or Check_JKH == True):
                 vk.messages.send(
                     user_id=event.user_id,
-                    message='You already started the chat!',
+                    message='Вы уже зарегистрированны!',
                     random_id=randomid
                 )
         if event.text == 'ЖКХ':
@@ -98,7 +98,7 @@ for event in Longpoll.listen():
                 jkh_list.append(event.user_id)
                 vk.messages.send(
                     user_id=event.user_id,
-                    message='Вы вступили в группу ЖКХ!',
+                    message='Вы зарегистрированны как представитель ЖКХ!',
                     random_id=randomid,
                     keyboard=kb_prim.JKH_KB_main()
                 )
@@ -113,7 +113,7 @@ for event in Longpoll.listen():
                 user_list.append(event.user_id)
                 vk.messages.send(
                     user_id=event.user_id,
-                    message='Вы вступили в группу Житель!',
+                    message='Вы зарегистрированны как Житель!',
                     random_id=randomid,
                     keyboard=kb_prim.Users_main()
                 )
