@@ -100,7 +100,7 @@ class Db_driver:
     def get_jkh_from_addr(self, addr):
         conn = self.get_connect()
         cursor = conn.cursor()
-        cursor.execute('select * from jkh_and_adress where adress='+addr)
+        cursor.execute(f'select * from jkh_and_adress where adress=\'{addr}\'')
         list = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -141,11 +141,22 @@ class Db_driver:
         else:
             return True
 
-    def write_user(self,id,first_name,last_name,address,id_jkh):
+
+
+    def get_keys(self):
         conn = self.get_connect()
         cursor = conn.cursor()
-        values = f"values ('{id}', '{first_name}', '{last_name}','{id_jkh}','{address}')"
-        cursor.execute('insert into users(id, first_name, last_name,id_jkh, adress) ' + values)
+        cursor.execute(f'select key from jkh')
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return rows
+
+    def write_user(self, id, id_jkh, address):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        values = f"values ('{id}','{id_jkh}','{address}')"
+        cursor.execute('insert into users(id, id_jkh, adress) ' + values)
         conn.commit()
         cursor.close()
         conn.close()
@@ -184,6 +195,15 @@ class Db_driver:
         cursor.close()
         conn.close()
 
+    def get_job(self, name):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select id from jobs where name={name}')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
+
     def write_response(self,user, order, rating):
         conn = self.get_connect()
         cursor = conn.cursor()
@@ -193,15 +213,51 @@ class Db_driver:
         cursor.close()
         conn.close()
 
-    def write_person_id(self, id, person_id):
+    def write_person_id(self, key, person_id):
         conn = self.get_connect()
         cursor = conn.cursor()
-        cursor.execute(f'update jkh set person_id = {person_id} where id = {id}')
+        cursor.execute(f'update jkh set id_person = \'{person_id}\' where key =\'{key}\'')
         conn.commit()
         cursor.close()
         conn.close()
 
+    def check_jkh(self, id):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select * from jkh where id_person=\'{id}\'')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        if len(list) == 0:
+            return False
+        else:
+            return True
 
+    def get_jkh_by_name(self, name):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select id from jkh where name=\'{name}\'')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
 
+    def get_orders_from_jkh(self, jkh_id):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select * from orders where jkh=\'{jkh_id}\'')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
+
+    def get_job_by_name(self, name):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select id from jobs where name=\'{name}\'')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
 
 
