@@ -34,11 +34,20 @@ class Db_driver:
         conn.close()
         return list
 
+    def get_rating(self):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute('select id, name, rating from jkh order by rating desc')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list
+
 
     def get_jkh(self):
         conn = self.get_connect()
         cursor = conn.cursor()
-        cursor.execute('select id, name from jkh order by rating desc')
+        cursor.execute('select id, name from jkh ')
         list = cursor.fetchall()
         cursor.close()
         conn.close()
