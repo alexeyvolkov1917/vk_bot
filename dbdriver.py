@@ -51,10 +51,19 @@ class Db_driver:
         conn.close()
         return list
 
+    def get_jkh_by_id(self, id):
+        conn = self.get_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'select id from jkh where id_person=\'{id}\'')
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return list[0]
+
     def get_jkh(self):
         conn = self.get_connect()
         cursor = conn.cursor()
-        cursor.execute('select id, name from jkh ')
+        cursor.execute('select *, name from jkh ')
         list = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -82,7 +91,7 @@ class Db_driver:
     def get_addr_from_jkh(self, jkh_id):
         conn = self.get_connect()
         cursor = conn.cursor()
-        cursor.execute('select adress from jkh_and_adress where jkh_id=' + jkh_id)
+        cursor.execute('select adress from jkh_and_adress where jkh_id=' + str(jkh_id))
         list = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -175,7 +184,7 @@ class Db_driver:
     def write_order(self,jkh, job, address,date):
         conn = self.get_connect()
         cursor = conn.cursor()
-        cursor.execute(f"insert into orders(jkh,job,address,date) values ({jkh},{job},'{address}','{date}')")
+        cursor.execute(f"insert into orders(jkh,job,address,date) values ({jkh},\'{job}\','{address}','{date}')")
         conn.commit()
         cursor.close()
         conn.close()
